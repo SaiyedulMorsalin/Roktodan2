@@ -15,9 +15,12 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = ["*"]
-# Remove CORS_ALLOW_ALL_ORIGINS if specific origins are defined
-# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://your-frontend-domain.com",
+#     "https://another-trusted-domain.com",
+# ]
+
+
 CSRF_TRUSTED_ORIGINS = ["https://roktodan2.onrender.com"]
 
 # Email settings
