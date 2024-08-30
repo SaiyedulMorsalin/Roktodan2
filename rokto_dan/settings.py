@@ -13,12 +13,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
-
+CORS_ALLOW_ALL_ORIGINS = True
 # CORS settings
-# CORS_ALLOWED_ORIGINS = [
-#     "https://your-frontend-domain.com",
-#     "https://another-trusted-domain.com",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://roktodan2.onrender.com",  # Your frontend domain
+    # Add any other trusted origins
+]
 
 
 CSRF_TRUSTED_ORIGINS = ["https://roktodan2.onrender.com"]
@@ -116,6 +116,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 MEDIA_URL = "media/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
