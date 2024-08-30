@@ -12,7 +12,7 @@ router.register("donations", views.DonationViewSet, basename="donations-list")
 urlpatterns = [
     path("", include(router.urls)),
     path(
-        
+        "blood_requests/accept/<int:request_id>/",
         views.AcceptRequestAPIView.as_view(),
         name="accept_request",
     ),
