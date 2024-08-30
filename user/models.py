@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .constants import BLOOD_GROUP, GENDER_TYPE
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
@@ -13,6 +16,17 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} Profile"
+
+    # Signal to create UserProfile whenever a new User is created
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            UserProfile.objects.create(user=instance)
+
+    # Signal to save the UserProfile whenever a User is saved
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.user_profile.save()
 
 
 class DonorProfile(models.Model):

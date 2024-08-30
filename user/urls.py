@@ -6,7 +6,7 @@ from . import views
 router = DefaultRouter()
 
 # Register viewsets with the router
-router.register("users", views.UserViewSet, basename="user-list")  # For UserViewSet
+router.register("profiles", views.UserViewSet, basename="user-list")  # For UserViewSet
 router.register("donors", views.DonorViewSet, basename="donor-list")  # For DonorViewSet
 # router.register(
 #     "profile", views.UserProfile, basename="user-profile"
@@ -19,10 +19,10 @@ urlpatterns = [
     path("users/login/", views.UserLoginApiView.as_view(), name="login"),
     path("users/logout/", views.UserLogoutView.as_view(), name="logout"),
     path("dashboard/", views.UserDashboardAPIView.as_view(), name="user_dashboard"),
-    path(
-        "profile/<int:user_id>/",
-        views.UserProfileAPIView.as_view(),
-        name="user_profile",
-    ),
+    # path(
+    #     "profile/<int:user_id>/",
+    #     views.UserViewSet.as_view(),
+    #     name="user_profile",
+    # ),
     path("", include(router.urls)),
 ]
