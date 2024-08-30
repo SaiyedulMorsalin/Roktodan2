@@ -16,8 +16,7 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000/",  # Your frontend domain
-    # Add any other trusted origins
+    "http://localhost:3000",
 ]
 
 
@@ -48,6 +47,7 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
+    
 }
 
 # Application definition
