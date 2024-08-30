@@ -15,9 +15,10 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = ["*"]
 # Remove CORS_ALLOW_ALL_ORIGINS if specific origins are defined
 # CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = ["https://roktodan2.onrender.com"]
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
