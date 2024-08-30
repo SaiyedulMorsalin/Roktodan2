@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import DonorProfile, UserProfile
+from .models import DonorProfile
 from .constants import BLOOD_GROUP, GENDER_TYPE
 
 
@@ -13,13 +13,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email"]
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField(many=False)
-    gender = serializers.ChoiceField(choices=GENDER_TYPE)
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     user = serializers.StringRelatedField(many=False)
+#     gender = serializers.ChoiceField(choices=GENDER_TYPE)
 
-    class Meta:
-        model = UserProfile
-        fields = ["user", "mobile_number", "gender", "blood_group"]
+#     class Meta:
+#         model = UserProfile
+#         fields = ["user", "mobile_number", "gender", "blood_group"]
 
 
 # Serializer for user registration, including validation for password confirmation

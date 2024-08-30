@@ -13,13 +13,12 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
-from .models import DonorProfile, UserProfile
+from .models import DonorProfile
 from .serializers import (
     RegistrationSerializer,
     UserSerializer,
     UserLoginSerializer,
     DonorProfileSerializer,
-    UserProfileSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .filters import DonorProfileFilter
@@ -82,28 +81,26 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import UserProfile
-from .serializers import UserProfileSerializer
 
 
-class UserProfileAPIView(APIView):
+# class UserProfileAPIView(APIView):
 
-    def get(self, request, user_id, *args, **kwargs):
-        try:
-            user_profile = UserProfile.objects.get(user__id=user_id)
-            serializer = UserProfileSerializer(user_profile)
-            return Response(serializer.data)
-        except UserProfile.DoesNotExist:
-            return Response(
-                {"error": "UserProfile not found."}, status=status.HTTP_404_NOT_FOUND
-            )
+#     def get(self, request, user_id, *args, **kwargs):
+#         try:
+#             user_profile = UserProfile.objects.get(user__id=user_id)
+#             serializer = UserProfileSerializer(user_profile)
+#             return Response(serializer.data)
+#         except UserProfile.DoesNotExist:
+#             return Response(
+#                 {"error": "UserProfile not found."}, status=status.HTTP_404_NOT_FOUND
+#             )
 
-    def post(self, request, *args, **kwargs):
-        serializer = UserProfileSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request, *args, **kwargs):
+#         serializer = UserProfileSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # API view for user registration with email confirmation

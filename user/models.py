@@ -6,27 +6,27 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 
 
-class UserProfile(models.Model):
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="user_profile"
-    )
-    mobile_number = models.CharField(max_length=12)
-    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP)
-    gender = models.CharField(max_length=10, choices=GENDER_TYPE, blank=True, null=True)
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(
+#         User, on_delete=models.CASCADE, related_name="user_profile"
+#     )
+#     mobile_number = models.CharField(max_length=12)
+#     blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP)
+#     gender = models.CharField(max_length=10, choices=GENDER_TYPE, blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.user.username} Profile"
+#     def __str__(self):
+#         return f"{self.user.username} Profile"
 
-    # Signal to create UserProfile whenever a new User is created
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            UserProfile.objects.create(user=instance)
+#     # Signal to create UserProfile whenever a new User is created
+#     @receiver(post_save, sender=User)
+#     def create_user_profile(sender, instance, created, **kwargs):
+#         if created:
+#             UserProfile.objects.create(user=instance)
 
-    # Signal to save the UserProfile whenever a User is saved
-    @receiver(post_save, sender=User)
-    def save_user_profile(sender, instance, **kwargs):
-        instance.user_profile.save()
+#     # Signal to save the UserProfile whenever a User is saved
+#     @receiver(post_save, sender=User)
+#     def save_user_profile(sender, instance, **kwargs):
+#         instance.user_profile.save()
 
 
 class DonorProfile(models.Model):
