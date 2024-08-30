@@ -16,7 +16,7 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://roktodan2.onrender.com",  # Your frontend domain
+    "http://localhost:3000/",  # Your frontend domain
     # Add any other trusted origins
 ]
 
