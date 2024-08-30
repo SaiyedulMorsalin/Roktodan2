@@ -15,9 +15,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5500",
-]
+CORS_ALLOWED_ORIGINS = []
 # Remove CORS_ALLOW_ALL_ORIGINS if specific origins are defined
 # CORS_ALLOW_ALL_ORIGINS = True
 
