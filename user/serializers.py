@@ -1,8 +1,6 @@
-# serializers.py
-
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import DonorProfile
+from .models import DonorProfile, UserProfile
 from .constants import BLOOD_GROUP, GENDER_TYPE
 
 
@@ -13,13 +11,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "first_name", "last_name", "email"]
 
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     user = serializers.StringRelatedField(many=False)
-#     gender = serializers.ChoiceField(choices=GENDER_TYPE)
+# Serializer for the UserProfile model
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+    gender = serializers.ChoiceField(choices=GENDER_TYPE)
 
-#     class Meta:
-#         model = UserProfile
-#         fields = ["user", "mobile_number", "gender", "blood_group"]
+    class Meta:
+        model = UserProfile
+        fields = ["user", "mobile_number", "gender", "blood_group"]
 
 
 # Serializer for user registration, including validation for password confirmation
@@ -56,30 +55,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create a new user with the validated data."""
-        validated_data.pop(
-            "confirm_password"
-        )  # Remove confirm_password field as it's not part of the User model
-
-        # Extract fields for user creation
-        username = validated_data["username"]
-        first_name = validated_data["first_name"]
-        last_name = validated_data["last_name"]
-        email = validated_data["email"]
-        mobile_number = validated_data["mobile_number"]
-        blood_group = validated_data["blood_group"]
-        password = validated_data["password"]
+        validated_data.pop("confirm_password")  # Remove confirm_password field
 
         # Create and save the user
         user = User(
-            username=username, first_name=first_name, last_name=last_name, email=email
+            username=validated_data["username"],
+            first_name=validated_data["first_name"],
+            last_name=validated_data["last_name"],
+            email=validated_data["email"],
         )
-        user.set_password(password)
+        user.set_password(validated_data["password"])
         user.is_active = False  # Account is inactive until email verification
         user.save()
 
-        # You can handle custom fields like mobile_number and blood_group as needed
-        # Save them in a related model if not using User directly.
-
+        # Save additional fields like mobile_number and blood_group in a related model
         return user
 
 
@@ -91,7 +80,6 @@ class UserLoginSerializer(serializers.Serializer):
 
 # Serializer for DonorProfile, including nested fields for user details
 class DonorProfileSerializer(serializers.ModelSerializer):
-    # Nested fields to display user information
     username = serializers.CharField(source="user.username", read_only=True)
     email = serializers.EmailField(source="user.email", read_only=True)
 
@@ -109,28 +97,15 @@ class DonorProfileSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        """
-        Creates a DonorProfile instance with the associated user.
-        """
-        # Extract the user from the request context
-        user = (
-            self.context["request"].user
-            if self.context["request"].user.is_authenticated
-            else None
-        )
-        # Ensure the user is provided when creating the profile
-        if not user:
-            raise serializers.ValidationError({"user": "User must be authenticated"})
+        """Creates a DonorProfile instance with the associated user."""
+        user = self.context["request"].user
+        if not user or not user.is_authenticated:
+            raise serializers.ValidationError({"user": "User must be authenticated."})
 
-        # Create the DonorProfile instance with the validated data
-        donor_profile = DonorProfile.objects.create(user=user, **validated_data)
-        return donor_profile
+        return DonorProfile.objects.create(user=user, **validated_data)
 
     def update(self, instance, validated_data):
-        """
-        Updates the DonorProfile fields.
-        """
-        # Update each field in the instance with the provided validated data
+        """Updates the DonorProfile fields."""
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()

@@ -1,9 +1,4 @@
-# views.py
-
 from django.shortcuts import render, redirect
-from rest_framework import viewsets, status, filters, generics
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
@@ -11,26 +6,31 @@ from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
-from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate, login, logout
-from .models import DonorProfile
+from rest_framework import viewsets, status, filters
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import DonorProfile, UserProfile
 from .serializers import (
     RegistrationSerializer,
     UserSerializer,
     UserLoginSerializer,
     DonorProfileSerializer,
+    UserProfileSerializer,
 )
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .filters import DonorProfileFilter
-from django_filters.rest_framework import DjangoFilterBackend
-import logging
 from blood.models import BloodRequest, Donation
 from blood.serializers import BloodRequestSerializer, DonationSerializer
+import logging
 
 logger = logging.getLogger(__name__)
 
 
-class UserDashboardAPIView(generics.GenericAPIView):
+# API View for User Dashboard
+class UserDashboardAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BloodRequestSerializer
 
@@ -61,7 +61,7 @@ class UserDashboardAPIView(generics.GenericAPIView):
         return Response(data)
 
 
-# Read-only viewset for listing users, accessible only to admin users
+# Read-only ViewSet for listing users, accessible only to admin users
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
@@ -69,41 +69,40 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get(self, request, user_id):
         try:
-            donor = Donor.objects.get(user_id=user_id)
+            donor = DonorProfile.objects.get(user_id=user_id)
             serializer = DonorProfileSerializer(donor)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Donor.DoesNotExist:
+        except DonorProfile.DoesNotExist:
             return Response(
-                {"detail": "Donor profile not found."}, status=status.HTTP_404_NOT_FOUND
+                {"detail": "Donor profile not found."},
+                status=status.HTTP_404_NOT_FOUND,
             )
 
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+# API View for User Profile Management
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id, *args, **kwargs):
+        try:
+            user_profile = UserProfile.objects.get(user__id=user_id)
+            serializer = UserProfileSerializer(user_profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "UserProfile not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class UserProfileAPIView(APIView):
-
-#     def get(self, request, user_id, *args, **kwargs):
-#         try:
-#             user_profile = UserProfile.objects.get(user__id=user_id)
-#             serializer = UserProfileSerializer(user_profile)
-#             return Response(serializer.data)
-#         except UserProfile.DoesNotExist:
-#             return Response(
-#                 {"error": "UserProfile not found."}, status=status.HTTP_404_NOT_FOUND
-#             )
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = UserProfileSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# API view for user registration with email confirmation
+# API View for User Registration with Email Confirmation
 class UserRegistrationApiView(APIView):
     serializer_class = RegistrationSerializer
 
@@ -139,7 +138,7 @@ class UserRegistrationApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# View to activate user account via email link
+# Function View to Activate User Account via Email Link
 def activate(request, uid64, token):
     try:
         uid = urlsafe_base64_decode(uid64).decode()
@@ -155,7 +154,7 @@ def activate(request, uid64, token):
         return redirect("user_register")
 
 
-# API view for user login with token authentication
+# API View for User Login with Token Authentication
 class UserLoginApiView(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -178,18 +177,21 @@ class UserLoginApiView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# API view for user logout
+# API View for User Logout
 class UserLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         request.user.auth_token.delete()
         logout(request)
         return redirect("login")
 
 
-# ViewSet for managing donor profiles with filtering and search capabilities
+# ViewSet for Managing Donor Profiles with Filtering and Search Capabilities
 class DonorViewSet(viewsets.ModelViewSet):
     queryset = DonorProfile.objects.all()
     serializer_class = DonorProfileSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = DonorProfileFilter
     search_fields = ["blood_group", "district", "date_of_donation", "donor_type"]
